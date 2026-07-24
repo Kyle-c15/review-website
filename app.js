@@ -258,13 +258,13 @@ function updateStats() {
   $("#poolLabel").textContent = `${QUESTIONS.length} 题题库`;
 }
 
-function renderMap() {
+function renderMap(preservePage = false) {
   const items = activeQuestions();
   const question = currentQuestion();
   const totalPages = Math.max(1, Math.ceil(items.length / MAP_PAGE_SIZE));
   const currentPage = Math.floor(state.index / MAP_PAGE_SIZE);
   const currentStart = state.mapPage * MAP_PAGE_SIZE;
-  if (state.index < currentStart || state.index >= currentStart + MAP_PAGE_SIZE) state.mapPage = currentPage;
+  if (!preservePage && (state.index < currentStart || state.index >= currentStart + MAP_PAGE_SIZE)) state.mapPage = currentPage;
   state.mapPage = Math.min(state.mapPage, totalPages - 1);
   const start = state.mapPage * MAP_PAGE_SIZE;
   const visibleItems = items.slice(start, start + MAP_PAGE_SIZE);
@@ -299,8 +299,8 @@ $("#submitButton").addEventListener("click", submitAnswer);
 $("#bookmarkButton").addEventListener("click", toggleBookmark);
 $("#prevButton").addEventListener("click", () => { if (state.index > 0) { state.index -= 1; render(); } });
 $("#nextButton").addEventListener("click", () => { if (state.index < activeQuestions().length - 1) { state.index += 1; render(); } });
-$("#mapPrev").addEventListener("click", () => { if (state.mapPage > 0) { state.mapPage -= 1; renderMap(); } });
-$("#mapNext").addEventListener("click", () => { const totalPages = Math.ceil(activeQuestions().length / MAP_PAGE_SIZE); if (state.mapPage < totalPages - 1) { state.mapPage += 1; renderMap(); } });
+$("#mapPrev").addEventListener("click", () => { if (state.mapPage > 0) { state.mapPage -= 1; renderMap(true); } });
+$("#mapNext").addEventListener("click", () => { const totalPages = Math.ceil(activeQuestions().length / MAP_PAGE_SIZE); if (state.mapPage < totalPages - 1) { state.mapPage += 1; renderMap(true); } });
 $("#resetProgress").addEventListener("click", () => {
   if (!confirm("确定清空全部答题、错题和收藏记录吗？")) return;
   state.answers = {}; state.submitted = {}; state.bookmarks = []; state.wrong = [];

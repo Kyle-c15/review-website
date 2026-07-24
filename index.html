@@ -83,6 +83,7 @@
                 <option value="单选">单选题</option>
                 <option value="多选">多选题</option>
               </select>
+              <span class="pool-label" id="poolLabel">497 题题库</span>
             </label>
           </div>
 
@@ -106,6 +107,7 @@
               <p class="question-kicker" id="questionKicker">QUESTION 01</p>
               <h2 id="questionStem">题目加载中...</h2>
               <p class="question-hint" id="questionHint"></p>
+              <p class="source-note" id="questionSource"></p>
               <form class="options-list" id="optionsList"></form>
             </div>
 
@@ -137,6 +139,7 @@
 
           <section class="rail-section question-map-section">
             <div class="rail-heading"><h2>题目导航</h2><span id="mapCount">24 题</span></div>
+            <div class="map-tools"><button class="map-page-button" id="mapPrev" type="button" aria-label="上一组题号">←</button><span id="mapRange">1-48</span><button class="map-page-button" id="mapNext" type="button" aria-label="下一组题号">→</button></div>
             <div class="question-map" id="questionMap"></div>
             <div class="map-legend"><span><i class="legend-dot current"></i>当前</span><span><i class="legend-dot done"></i>已答</span><span><i class="legend-dot wrong"></i>错题</span></div>
           </section>
@@ -149,6 +152,7 @@
       </section>
     </main>
   </div>
+  <script src="question-bank.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -70,7 +70,8 @@ const QUESTIONS = [
   },
   {
     id: 24, chapter: "矿物质", mode: "多选", stem: "下列因素中，可促进钙吸收的是", options: ["乳糖", "植酸", "部分氨基酸", "孕期和哺乳期的生理适应"], answer: [0, 2, 3], explanation: "乳糖发酵产酸、部分氨基酸形成可溶性钙盐，孕期和哺乳期主动及被动吸收均增加；植酸会与钙形成难溶盐而抑制吸收。", tip: "促进/抑制因素要按“形成可溶性盐”或“形成难溶性盐”判断。"
-  }
+  },
+  ...QUESTION_BANK
 ];
 
 const STORAGE_KEY = "nutrition-quiz-progress-v1";
@@ -84,8 +85,11 @@ const state = {
   submitted: saved.submitted || {},
   bookmarks: saved.bookmarks || [],
   wrong: saved.wrong || [],
-  lastActive: saved.lastActive || Date.now()
+  lastActive: saved.lastActive || Date.now(),
+  mapPage: 0
 };
+
+const MAP_PAGE_SIZE = 48;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -116,7 +120,10 @@ function currentQuestion() {
 
 function setView(view) {
   state.view = view;
+  state.chapter = "全部";
+  state.mode = "全部";
   state.index = 0;
+  state.mapPage = 0;
   $$(".nav-item").forEach((button) => button.classList.toggle("is-active", button.dataset.view === view));
   $("#pageTitle").textContent = view === "practice" ? "章节练习" : view === "wrong" ? "错题本" : "收藏题";
   render();
@@ -149,6 +156,7 @@ function renderQuestion() {
   $("#questionKicker").textContent = `QUESTION ${String(question.id).padStart(2, "0")}`;
   $("#questionStem").textContent = question.stem;
   $("#questionHint").textContent = question.mode === "多选" ? "本题为多选题，选择全部正确选项。" : "本题为单选题，选择一个最符合题意的选项。";
+  $("#questionSource").textContent = question.source ? `依据：${question.source}` : "依据：教材第 33-64 页";
   $("#questionNumber").textContent = `${state.index + 1} / ${items.length}`;
   $("#bookmarkButton").classList.toggle("is-saved", state.bookmarks.includes(question.id));
   $("#bookmarkIcon").textContent = state.bookmarks.includes(question.id) ? "★" : "☆";
@@ -177,7 +185,7 @@ function showFeedback(question) {
   $("#feedbackIcon").textContent = correct ? "✓" : "!";
   $("#feedbackTitle").textContent = correct ? "回答正确" : "需要复习";
   $("#feedbackText").textContent = `正确答案：${question.answer.map((index) => String.fromCharCode(65 + index)).join("、")}`;
-  $("#explanation").textContent = question.explanation;
+  $("#explanation").textContent = `${question.explanation}${question.source ? `（依据：${question.source}）` : ""}`;
   $$("#optionsList .option").forEach((option) => {
     const optionIndex = Number(option.dataset.optionIndex);
     option.classList.toggle("is-correct", question.answer.includes(optionIndex));
@@ -247,12 +255,24 @@ function updateStats() {
   $("#wrongCount").textContent = state.wrong.length;
   $("#streakText").textContent = answered.length ? `${answered.length} 题已完成` : "今天开始";
   $("#mapCount").textContent = `${visible.length} 题`;
+  $("#poolLabel").textContent = `${QUESTIONS.length} 题题库`;
 }
 
 function renderMap() {
   const items = activeQuestions();
   const question = currentQuestion();
-  $("#questionMap").innerHTML = items.map((item, itemIndex) => {
+  const totalPages = Math.max(1, Math.ceil(items.length / MAP_PAGE_SIZE));
+  const currentPage = Math.floor(state.index / MAP_PAGE_SIZE);
+  const currentStart = state.mapPage * MAP_PAGE_SIZE;
+  if (state.index < currentStart || state.index >= currentStart + MAP_PAGE_SIZE) state.mapPage = currentPage;
+  state.mapPage = Math.min(state.mapPage, totalPages - 1);
+  const start = state.mapPage * MAP_PAGE_SIZE;
+  const visibleItems = items.slice(start, start + MAP_PAGE_SIZE);
+  $("#mapRange").textContent = items.length ? `${start + 1}-${Math.min(start + MAP_PAGE_SIZE, items.length)}` : "0-0";
+  $("#mapPrev").disabled = state.mapPage === 0;
+  $("#mapNext").disabled = state.mapPage >= totalPages - 1;
+  $("#questionMap").innerHTML = visibleItems.map((item, localIndex) => {
+    const itemIndex = start + localIndex;
     const classes = ["map-button"];
     if (question && item.id === question.id) classes.push("is-current");
     if (state.submitted[item.id]) classes.push("is-done");
@@ -279,6 +299,8 @@ $("#submitButton").addEventListener("click", submitAnswer);
 $("#bookmarkButton").addEventListener("click", toggleBookmark);
 $("#prevButton").addEventListener("click", () => { if (state.index > 0) { state.index -= 1; render(); } });
 $("#nextButton").addEventListener("click", () => { if (state.index < activeQuestions().length - 1) { state.index += 1; render(); } });
+$("#mapPrev").addEventListener("click", () => { if (state.mapPage > 0) { state.mapPage -= 1; renderMap(); } });
+$("#mapNext").addEventListener("click", () => { const totalPages = Math.ceil(activeQuestions().length / MAP_PAGE_SIZE); if (state.mapPage < totalPages - 1) { state.mapPage += 1; renderMap(); } });
 $("#resetProgress").addEventListener("click", () => {
   if (!confirm("确定清空全部答题、错题和收藏记录吗？")) return;
   state.answers = {}; state.submitted = {}; state.bookmarks = []; state.wrong = [];

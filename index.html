@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>营养学基础 · 高分刷题</title>
+  <meta name="description" content="营养学基础单选题和多选题练习">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand-lockup">
+        <div class="brand-mark">N</div>
+        <div>
+          <strong>营养学基础</strong>
+          <span>高分刷题系统</span>
+        </div>
+      </div>
+
+      <nav class="primary-nav">
+        <button class="nav-item is-active" data-view="practice"><span class="nav-icon">◈</span>开始刷题</button>
+        <button class="nav-item" data-view="wrong"><span class="nav-icon">!</span>错题本 <span class="nav-count" id="wrongCount">0</span></button>
+        <button class="nav-item" data-view="bookmarks"><span class="nav-icon">☆</span>收藏题</button>
+      </nav>
+
+      <div class="sidebar-note">
+        <span class="eyebrow">当前范围</span>
+        <strong>教材第 33-64 页</strong>
+        <span>蛋白质 · 脂类 · 碳水化合物 · 能量 · 矿物质</span>
+      </div>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span>本地进度已保存</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <span class="breadcrumb">第一章 / 营养学基础</span>
+          <h1 id="pageTitle">章节练习</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="streak-label"><span class="streak-dot"></span><span id="streakText">今天开始</span></span>
+          <button class="reset-button" id="resetProgress" type="button">清空进度</button>
+        </div>
+      </header>
+
+      <section class="overview-strip" aria-label="练习概览">
+        <div class="overview-item">
+          <span class="overview-label">当前题目</span>
+          <strong id="questionNumber">1 / 24</strong>
+        </div>
+        <div class="overview-item">
+          <span class="overview-label">已完成</span>
+          <strong id="completedNumber">0</strong>
+        </div>
+        <div class="overview-item">
+          <span class="overview-label">正确率</span>
+          <strong id="accuracyNumber">--</strong>
+        </div>
+        <div class="progress-track" aria-label="完成进度"><span id="progressBar"></span></div>
+      </section>
+
+      <section class="workspace">
+        <div class="content-column">
+          <div class="filter-row" id="filterRow">
+            <div class="filter-group">
+              <span class="filter-label">章节</span>
+              <button class="filter-chip is-selected" data-chapter="全部" type="button">全部</button>
+              <button class="filter-chip" data-chapter="蛋白质" type="button">蛋白质</button>
+              <button class="filter-chip" data-chapter="脂类" type="button">脂类</button>
+              <button class="filter-chip" data-chapter="碳水化合物" type="button">碳水化合物</button>
+              <button class="filter-chip" data-chapter="能量" type="button">能量</button>
+              <button class="filter-chip" data-chapter="矿物质" type="button">矿物质</button>
+            </div>
+            <label class="select-wrap">
+              <span class="filter-label">题型</span>
+              <select id="modeSelect" aria-label="选择题型">
+                <option value="全部">全部题型</option>
+                <option value="单选">单选题</option>
+                <option value="多选">多选题</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="empty-state" id="emptyState" hidden>
+            <div class="empty-icon">✓</div>
+            <h2>这里还没有题目</h2>
+            <p>完成更多练习后，错题和收藏会出现在这里。</p>
+            <button class="primary-button" data-view="practice" type="button">回到刷题</button>
+          </div>
+
+          <article class="question-card" id="questionCard">
+            <div class="question-header">
+              <div class="question-tags">
+                <span class="chapter-tag" id="chapterTag">脂类</span>
+                <span class="type-tag" id="typeTag">单选题</span>
+              </div>
+              <button class="bookmark-button" id="bookmarkButton" type="button" aria-label="收藏当前题目"><span id="bookmarkIcon">☆</span><span id="bookmarkText">收藏</span></button>
+            </div>
+
+            <div class="question-body">
+              <p class="question-kicker" id="questionKicker">QUESTION 01</p>
+              <h2 id="questionStem">题目加载中...</h2>
+              <p class="question-hint" id="questionHint"></p>
+              <form class="options-list" id="optionsList"></form>
+            </div>
+
+            <div class="feedback" id="feedback" hidden>
+              <div class="feedback-title"><span id="feedbackIcon"></span><strong id="feedbackTitle"></strong></div>
+              <p id="feedbackText"></p>
+              <div class="explanation" id="explanation"></div>
+            </div>
+
+            <div class="question-footer">
+              <button class="secondary-button" id="prevButton" type="button">← 上一题</button>
+              <span class="save-status" id="saveStatus">选择答案后提交</span>
+              <button class="primary-button" id="submitButton" type="button">提交答案</button>
+              <button class="secondary-button" id="nextButton" type="button">下一题 →</button>
+            </div>
+          </article>
+        </div>
+
+        <aside class="right-rail" aria-label="练习统计">
+          <section class="rail-section">
+            <div class="rail-heading"><h2>本轮进度</h2><span id="sessionPercent">0%</span></div>
+            <div class="large-progress"><span id="sessionBar"></span></div>
+            <div class="rail-stats">
+              <div><strong id="railDone">0</strong><span>已完成</span></div>
+              <div><strong id="railCorrect">0</strong><span>答对</span></div>
+              <div><strong id="railWrong">0</strong><span>待复习</span></div>
+            </div>
+          </section>
+
+          <section class="rail-section question-map-section">
+            <div class="rail-heading"><h2>题目导航</h2><span id="mapCount">24 题</span></div>
+            <div class="question-map" id="questionMap"></div>
+            <div class="map-legend"><span><i class="legend-dot current"></i>当前</span><span><i class="legend-dot done"></i>已答</span><span><i class="legend-dot wrong"></i>错题</span></div>
+          </section>
+
+          <section class="micro-note">
+            <span class="eyebrow">记忆提示</span>
+            <p id="memoryTip">先判断题型，再抓数字、方向和因果关系。</p>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

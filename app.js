@@ -1,4 +1,4 @@
-const QUESTIONS = [
+const LEGACY_QUESTIONS = [
   {
     id: 1, chapter: "蛋白质", mode: "单选", stem: "上臂肌围（AMC）的计算公式是", options: ["AC + 3.14 × TSF", "AC - 3.14 × TSF", "AC - TSF ÷ 3.14", "TSF - 3.14 × AC"], answer: [1], explanation: "AMC（mm）= AC（mm）- 3.14 × TSF（mm），上臂肌围和上臂肌区可用于评价总体蛋白质储存。", tip: "公式题先抓住“上臂围减去皮褶厚度乘以 3.14”。"
   },
@@ -74,17 +74,59 @@ const QUESTIONS = [
   ...QUESTION_BANK
 ];
 
-const STORAGE_KEY = "nutrition-quiz-progress-v1";
-const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+function applicationSingle(id, chapter, stem, correct, distractors, explanation, source, tip) {
+  return { id, chapter, mode: "单选", stem, options: [correct, ...distractors], answer: [0], explanation, source, tip };
+}
+
+function applicationMulti(id, chapter, stem, correct, distractors, explanation, source, tip) {
+  return { id, chapter, mode: "多选", stem, options: [...correct, ...distractors], answer: correct.map((_, index) => index), explanation, source, tip };
+}
+
+const APPLICATION_QUESTIONS = [
+  applicationSingle(1, "蛋白质", "一名男性的 AMC 测定值为 22.0 cm，国际标准为 25.3 cm。按教材的判定界限，最合适的结论是", "不能判为 AMC 正常", ["一定存在严重蛋白质缺乏", "一定属于正常", "只要能量摄入充足即可判为正常"], "22.0/25.3 约为 87%，未达到大于标准值 90% 的正常界限；单凭一个指标也不能直接诊断严重缺乏。", "教材第33页", "先算测定值占标准值的百分比，再看是否大于 90%。"),
+  applicationSingle(2, "蛋白质", "某受试者能量摄入充足但蛋白质摄入不足，此时用来辅助判断蛋白质营养状况的指标是", "SAAR", ["GI", "BMD", "RQ"], "SAAR 只有在能量摄入充足而蛋白质不足的前提下才有意义。", "教材第33页", "指标必须结合使用前提。"),
+  applicationMulti(3, "蛋白质", "为提高植物性膳食蛋白质的利用率，较符合教材思路的做法包括", ["将不同植物性食物合理搭配", "适当加入大豆及其制品", "用奶及奶制品补充优质蛋白质"], ["完全排除所有动物性食物", "用精制糖替代蛋白质来源"], "植物蛋白利用率相对较低，可通过互补搭配以及大豆、奶类等优质来源改善膳食质量。", "教材第33页", "互补搭配是组合思维，不是单独依赖一种食物。"),
+  applicationSingle(4, "蛋白质", "按成人通常适宜摄入量 0.8 g/(kg·d) 估算，体重 70 kg 的成人每天约需蛋白质", "56 g", ["5.6 g", "0.56 g", "560 g"], "70×0.8=56 g/d；这是按体重估算的适宜摄入量，不等同于所有人的固定 RNI。", "教材第33页", "先统一 kg、g 和每天，再做乘法。"),
+  applicationSingle(5, "脂类", "长链脂肪酸在小肠细胞内重新合成甘油三酯后，主要以哪种形式经淋巴进入血液", "乳糜微粒", ["直接以游离葡萄糖形式", "LDL", "尿素"], "长链脂肪酸重新合成甘油三酯后，与磷脂、胆固醇和蛋白质形成乳糜微粒，经淋巴进入血液。", "教材第39页", "长链脂肪酸重点记乳糜微粒和淋巴。"),
+  applicationSingle(6, "脂类", "需要较快吸收利用脂肪、且不希望其先形成乳糜微粒时，更符合教材描述的脂肪酸是", "中链脂肪酸", ["长链脂肪酸", "胆固醇", "反式脂肪酸"], "中链脂肪酸水溶性较好，不需胆汁乳化，吸收后可经门静脉直接进入肝脏。", "教材第39页", "中链对应不需乳化、门静脉。"),
+  applicationSingle(7, "脂类", "在总能量摄入不变的情况下，用不饱和脂肪酸替代部分饱和脂肪酸，教材所述较可能的血脂变化是", "LDL-C 下降", ["LDL-C 必然升高", "所有脂蛋白均消失", "脂肪完全不能被吸收"], "适当用不饱和脂肪酸替代饱和脂肪酸，通常有利于降低血胆固醇、甘油三酯和 LDL-C。", "教材第42-43页", "替代题要同时看替代对象和血脂方向。"),
+  applicationMulti(8, "脂类", "一份膳食同时提供下列物质，其中属于必需脂肪酸或其重要长链衍生物的有", ["亚油酸", "α-亚麻酸", "EPA", "DHA"], ["胆固醇", "硬脂酸"], "亚油酸和 α-亚麻酸属于 EFA，EPA 和 DHA 是重要长链多不饱和脂肪酸；胆固醇和硬脂酸不属于此组。", "教材第37-39页", "先区分 EFA，再识别其长链衍生物。"),
+  applicationSingle(9, "脂类", "某食品配料中含部分氢化植物油，复习时最应警惕的营养问题是", "可能含反式脂肪酸", ["一定不含任何脂肪酸", "必然富含 DHA", "会把所有脂肪转为胆固醇"], "植物油氢化过程中，部分顺式不饱和脂肪酸可能转变为反式脂肪酸。", "教材第36页", "部分氢化是反式脂肪酸的来源线索。"),
+  applicationMulti(10, "脂类", "为促进脂溶性维生素利用，膳食中脂类可发挥的作用包括", ["促进维生素 A 吸收", "促进维生素 D 吸收", "促进维生素 E、K 吸收", "延缓胃排空并增加饱腹感"], ["直接替代氧气参与呼吸", "直接合成淀粉"], "脂肪可促进 A、D、E、K 的消化吸收，也可延缓胃排空、增加饱腹感。", "教材第35页", "ADEK 与脂肪相联；功能题注意不要绝对化。"),
+  applicationSingle(11, "碳水化合物", "某食品 GI=80，每份含 5 g 可消化碳水化合物。按 GL 公式计算，每份 GL 为", "4", ["0.4", "16", "85"], "GL=可消化碳水化合物摄入量×GI/100=5×80/100=4。", "教材第46-47页", "GL 同时考虑 GI 和实际摄入量。"),
+  applicationSingle(12, "碳水化合物", "淀粉类食物煮熟后冷却，直链和支链淀粉发生回生，最符合的抗性淀粉分类是", "RS3", ["RS1", "RS2", "单糖"], "RS3 是淀粉煮熟或糊化后冷却回生形成的抗性淀粉。", "教材第45页", "煮熟后冷却回生对应 RS3。"),
+  applicationMulti(13, "碳水化合物", "糖尿病患者选择主食时，较符合教材逻辑的做法包括", ["关注 GI", "同时考虑每份可消化碳水化合物的量", "适当增加全谷物和膳食纤维", "限制添加糖"], ["只要 GI 高低而完全不看摄入量", "把所有糖醇都当作脂肪"], "血糖管理需要结合 GI、GL、碳水化合物摄入量、膳食纤维和添加糖等因素。", "教材第46-49页", "慢病膳食题常考多因素联合判断。"),
+  applicationSingle(14, "碳水化合物", "膳食碳水化合物长期供应不足时，机体为维持血糖可启动的过程是", "糖异生", ["脂肪乳化", "骨盐沉积", "胆固醇逆向运输"], "碳水化合物不足时，机体可通过糖异生生成葡萄糖，主要涉及蛋白质等底物。", "教材第48页", "碳水不足与糖异生相联。"),
+  applicationSingle(15, "碳水化合物", "不能在小肠充分消化、到达结肠后被菌群发酵的碳水化合物，主要产生", "短链脂肪酸和气体", ["乳糜微粒和 LDL", "骨盐和血红蛋白", "胆固醇和尿素"], "部分不消化碳水化合物在结肠被菌群发酵，主要产生短链脂肪酸和气体。", "教材第47-49页", "结肠发酵是膳食纤维和抗性淀粉的关键去向。"),
+  applicationSingle(16, "能量", "受试者进餐后额外增加的能量消耗，属于", "食物热效应", ["基础代谢", "骨矿物质密度", "静息状态下的全部能量"], "进食后消化、吸收、利用和转化营养素产生的额外能量消耗称为食物热效应。", "教材第53页", "进餐后额外消耗就是 TEF。"),
+  applicationSingle(17, "能量", "若要估计受试者在自由生活状态下连续 10 天的总能量消耗，较合适的方法是", "双标水法", ["直接测热法", "只测一次基础代谢", "骨密度测量"], "双标水法适合测定 7-15 天自由活动状态下的总能量消耗。", "教材第54页", "自由生活加多日测量对应双标水法。"),
+  applicationMulti(18, "能量", "测定基础代谢时，符合基本条件的有", ["空腹 10-12 小时", "清醒、安静仰卧", "保持适宜且恒定的环境温度", "测试前避免身体活动和精神紧张"], ["刚完成中等强度运动后立即测量", "进餐后立即测量"], "基础代谢测定要求空腹、清醒安静、恒温、无近期运动和精神紧张影响。", "教材第51-52页", "基础代谢条件可归纳为：空腹、安静、恒温、无活动。"),
+  applicationSingle(19, "能量", "某项活动强度为 5 MET，按教材分级应归为", "中等强度身体活动", ["低强度活动", "高强度活动", "无法判断"], "3-6 MET 为中等强度，7-9 MET 为高强度；5 MET 落在中等强度范围。", "教材第52页", "5 位于 3-6 的区间内。"),
+  applicationSingle(20, "能量", "一名成年人主要坐位工作、很少进行体力活动，估算总能量消耗时可优先采用的 PAL 是", "1.5", ["1.0", "1.75", "2.0"], "坐位工作和静态生活方式对应轻体力活动水平，PAL 约为 1.5。", "教材第56页", "先根据职业和生活方式判断活动等级。"),
+  applicationSingle(21, "矿物质", "某人血清总钙正常但骨密度明显下降，最合理的判断是", "不能仅凭血钙排除长期钙营养问题", ["血钙正常即可排除所有钙问题", "骨骼完全不储存钙", "骨密度与钙营养完全无关"], "血钙受精密稳态调控，骨骼又是巨大的钙储备库，血清钙不能单独反映长期钙营养状况。", "教材第62页", "正常血钙不等于长期钙营养一定正常。"),
+  applicationSingle(22, "矿物质", "在其他条件相近时，钠摄入增加后尿钙通常会", "增加", ["减少", "完全不变", "转变为粪钙"], "钠和钙在肾小管重吸收过程中存在竞争，钠摄入增加可增加尿钙排泄。", "教材第61页", "钠钙肾小管竞争是方向判断依据。"),
+  applicationSingle(23, "矿物质", "孕期和哺乳期钙吸收率升高，主要体现了机体对哪类因素的适应", "特殊生理阶段的钙需要增加", ["血糖必然下降", "脂肪完全停止吸收", "磷从体内消失"], "孕期和哺乳期钙的主动、被动吸收均增加，是对钙需要增加的生理适应。", "教材第61页", "特殊生理期题先看需要量是否增加。"),
+  applicationSingle(24, "矿物质", "低血钙时，PTH 对钙和磷的总体调节方向分别是", "升高血钙、降低血磷", ["降低血钙、升高血磷", "同时降低血钙和血磷", "同时升高血钙和血磷"], "PTH 促进骨钙释放和钙重吸收，同时抑制肾近曲小管磷重吸收，增加尿磷排泄。", "教材第60、64页", "PTH 对钙和磷的方向要分开记：钙升、磷降。")
+];
+
+const QUESTIONS = [...APPLICATION_QUESTIONS, ...QUESTION_BANK];
+
+const STORAGE_KEY = "nutrition-quiz-progress-v2";
+const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem("nutrition-quiz-progress-v1") || "{}");
+const isCurrentQuestionId = (id) => Number(id) > 24;
+const savedAnswers = Object.fromEntries(Object.entries(saved.answers || {}).filter(([id]) => isCurrentQuestionId(id)));
+const savedSubmitted = Object.fromEntries(Object.entries(saved.submitted || {}).filter(([id]) => isCurrentQuestionId(id)));
+const savedBookmarks = (saved.bookmarks || []).filter(isCurrentQuestionId);
+const savedWrong = (saved.wrong || []).filter(isCurrentQuestionId);
 const state = {
   view: "practice",
   chapter: "全部",
   mode: "全部",
   index: 0,
-  answers: saved.answers || {},
-  submitted: saved.submitted || {},
-  bookmarks: saved.bookmarks || [],
-  wrong: saved.wrong || [],
+  answers: savedAnswers,
+  submitted: savedSubmitted,
+  bookmarks: savedBookmarks,
+  wrong: savedWrong,
   lastActive: saved.lastActive || Date.now(),
   mapPage: 0
 };
